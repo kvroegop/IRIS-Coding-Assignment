@@ -26,7 +26,7 @@ public class JokeController {
         Optional<Joke> matchingJoke = jokeApiService.getShortestSafJokeWithUrlFilter();
 
         if (matchingJoke.isEmpty()) {
-            log.info("No jokes found that are considered safe to display. ");
+            log.info("No jokes found that are considered safe to display.");
             throw new JokeNotFoundException();
         }
 
