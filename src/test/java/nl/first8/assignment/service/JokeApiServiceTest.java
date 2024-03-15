@@ -20,8 +20,11 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
@@ -49,7 +52,7 @@ class JokeApiServiceTest {
         String responseMessage = Files.readString(Path.of(fileWithMockResponse.toURI()));
         mockServer.expect(
                         ExpectedCount.once(),
-                        requestTo(new URI("https://v2.jokeapi.dev/joke/Any?type=single&amount=16"))
+                        requestTo(new URI("https://v2.jokeapi.dev/joke/Any?type=single&amount=10"))
                 )
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(
@@ -58,9 +61,14 @@ class JokeApiServiceTest {
                                 .body(responseMessage)
                 );
 
-        Joke shortestSafeRandomJoke = jokeApiService.getShortestSafeRandomJoke();
+        Optional<Joke> shortestSafeRandomJoke = jokeApiService.getShortestSafeRandomJoke();
         mockServer.verify();
-        assertEquals("Debugging: Removing the needles from the haystack.", shortestSafeRandomJoke.getJoke());
+        assertThat(shortestSafeRandomJoke)
+                .isPresent()
+                .get()
+                .extracting("joke", "category")
+                .as("Joke", "Category")
+                .containsExactly("Debugging: Removing the needles from the haystack.", "Programming");
     }
 
 
